@@ -12,34 +12,34 @@
 %
 %==============================================================================
 :- dynamic '$mina'/2.
-:- dynamic "$abertas'/1.
-:- dynamic "$errados'/1.
-:- dynamic '$marcadas’/1.
+:- dynamic '$abertas'/1.
+:- dynamic '$errados'/1.
+:- dynamic '$marcadas'/1.
 :- dynamic aberta/2.
 :- dynamic dimensao/2.
 :- dynamic marca/2.
 
-ler_campo( Ficheiro ) :-
-	limpar_base_dados,
-	reconsult( Ficheiro ),
-	inicializar_base_dados.
+ler_campo(Ficheiro) :-
+    limpar_base_dados,
+    reconsult(Ficheiro),
+    inicializar_base_dados.
 
 limpar_base_dados :-
-	(dynamic '$mina'/2),
-	(dynamic '$abertas'/1),
-	(dynamic '$errados'/1),
-	(dynamic '$marcadas'/1),
-	(dynamic aberta/2),
-	(dynamic dimensao/2),
-	(dynamic marca/2).
+    retractall('$mina'(_, _)),
+    retractall('$abertas'(_)),
+    retractall('$errados'(_)),
+    retractall('$marcadas'(_)),
+    retractall(aberta(_, _)),
+    retractall(dimensao(_, _)),
+    retractall(marca(_, _)).
 
 inicializar_base_dados :-
-	assert( '$abertas'(0) ),
-	assert( '$errados'(0) ),
-	assert( '$marcadas'(0) ).
+    assertz('$abertas'(0)),
+    assertz('$errados'(0)),
+    assertz('$marcadas'(0)).
 
 abrir( X, Y ) :-
-	retract ( '$abertas'(N) ),
+	retract( '$abertas'(N) ),
 	N1 is N + 1,
 	assert( '$abertas'(N1) ),
 	( not aberta(X,Y) -> assert( aberta(X,Y) ) ; true ), !,
@@ -50,20 +50,20 @@ abrir( X, Y ) :-
 	).
 
 mina( X, Y ) :-
-	aberta (X,Y),
+	aberta(X,Y),
 	'$mina'(X,Y).
 
 %================================================================================
 %
 %================================================================================
-minas( X, Y, N ) :-
-	aberta (X,Y),
-	'$contar' (X,Y,N).
+minas(X, Y, N) :-
+	aberta(X,Y),
+	'$contar'(X,Y,N).
 
 %================================================================================
 %
 %================================================================================
-marcar( X, Y ) :-
+marcar(X, Y) :-
 	(not marca(X,Y) -> 	assert( marca(X,Y) ),
 						retract ( '$marcadas'(N) ),
 						N1 is N + 1,
@@ -77,8 +77,8 @@ marcar( X, Y ) :-
 %================================================================================
 '$contar'(X,Y,N) :-
 	findall( 1, (
-		member (Dx, [-1,0,1]), member( Dy, [-1,0,1]), Vx is X + Dx, Vy is Y + Dy,
-			not ( X = Vx, Y = Vy), '$mina' (Vx,Vy)
+		member(Dx, [-1,0,1]), member( Dy, [-1,0,1]), Vx is X + Dx, Vy is Y + Dy,
+			not (X = Vx, Y = Vy), '$mina' (Vx,Vy)
 		),
 		M
 	),
@@ -87,11 +87,10 @@ marcar( X, Y ) :-
 %================================================================================
 %
 %================================================================================
-pontuacao(A,M,E) :-
-	'$abertas'(A),
-	'$errados'(E),
-	'$marcadas’(M).
-
+pontuacao(A, M, E) :-
+    '$abertas'(A),
+    '$errados'(E),
+    '$marcadas'(M).
 
 %================================================================================
 %================================================================================
@@ -102,7 +101,7 @@ pontuacao(A,M,E) :-
 %================================================================================
 % toLst(+L, -L). função auxiliar. Devolve a própria lista 
 %================================================================================
-toLst(L, L) :- !
+toLst(L, L) :- !.
 
 %================================================================================
 % viz_fechada(+Pos, -N, -L )
@@ -110,7 +109,7 @@ toLst(L, L) :- !
 % saida: n. de casas na vizinhanca de (X,Y) que nao foram abertas e nao foram 
 % 	marcadas, e a lista dessas mesmas posicoes.
 %================================================================================
-viz fechada_rec([], 0, []).
+viz_fechada_rec([], 0, []).
 
 viz_fechada_rec([(X, Y)|Xs], N, L) :-
 	aberta(X, Y), !,
@@ -245,7 +244,7 @@ vizinhanca((X, Y), V) :-
 vizinhanca((X, Y), V) :-
 	X = 1,
 	Y = 1,
-	X2 is X + i,
+	X2 is X + 1,
 	Y2 is Y + 1,
 	toLst([(X,Y2)|[(X2,Y2)|[(X2,Y)]]], V).
 
@@ -283,7 +282,7 @@ vizinhanca((X, Y), V) :-
 	toLst([(X1,Y)|[(X,Y1)|[(X1,Y1)]]], V).
 
 %================================================================================
-% remove front(+F, +(X, Y), -Fa).
+% remove_front(+F, +(X, Y), -Fa).
 %
 % F 	-> lista de casas fechadas que fazem fronteira com casas abertas
 % (X,Y) -> coordenadas (X, Y) de uma casa
@@ -291,10 +290,10 @@ vizinhanca((X, Y), V) :-
 %================================================================================
 remove_front([], C, []) :- !.
 
-remove front([C|Xs], C, Xs) :- !.
+remove_front([C|Xs], C, Xs) :- !.
 
-remove front([C|Xs], C2, [C|F2]) :-
-	remove front(Xs, C2, F2), !.
+remove_front([C|Xs], C2, [C|F2]) :-
+	remove_front(Xs, C2, F2), !.
 
  
 %================================================================================
@@ -306,7 +305,7 @@ remove front([C|Xs], C2, [C|F2]) :-
 %================================================================================
 actualiza_front([], F, F) :- !.
 
-actualiza front(F, [], F) :- !.
+actualiza_front(F, [], F) :- !.
 
 actualiza_front([C|Xs], [C2|Xs2], [C2|F2]) :
 	not member(C2, [C|Xs]), !,
@@ -317,7 +316,7 @@ actualiza_front([C|Xs], [C2|Xs2], F) :-
 	actualiza_front([C|Xs], Xs2, F).
 
 %================================================================================
-% insere prob(+P, +PL, -Lr)
+% insere_prob(+P, +PL, -Lr)
 % 	insere P na lista PL de forma ordenada por Prob. e devolve o resultado em Lr
 %================================================================================
 insere_prob(P, [], [P]) :- !.
@@ -341,8 +340,8 @@ probab_rec([], []) :- !.
 probab_rec([(X, Y)|Xs], Fp) :-
 	viz_aberta((X, Y), Na, La),
 	get_prob(La, Prob),
-	probab rec(Xs, Fp2),
-	insere prob((X, Y, Prob), Fp2, Fp), !.
+	probab_rec(Xs, Fp2),
+	insere_prob((X, Y, Prob), Fp2, Fp), !.
 
 %================================================================================
 % get_prob(+L, -Prob).
@@ -428,7 +427,7 @@ marcar_rec(F, [(X, Y, Prob)|Xs], Fa) :-
 	
 %================================================================================
 % joga_incerteza(+F, +Fp, —Fa).
-%--------------------------------------------------------------------------------
+%
 % F		-> lista contendo as casa fechadas que fazem fronteira com casas abertas.
 % Fp 	-> lista de elementos(X, Y, Prob), em que Prob e a probabilidade de
 %				existencia de mina na casa de coordenadas (X, Y).
@@ -437,7 +436,7 @@ marcar_rec(F, [(X, Y, Prob)|Xs], Fa) :-
 %================================================================================
 joga_incerteza(F, [(X,Y,P)|Ps], Fa) :-
 	P =< 0.25, !, 					% 0.34
-	remove front(F, (X, Y), F2),
+	remove_front(F, (X, Y), F2),
 	viz_fechada((X, Y), N, Vf),
 	actualiza_front(F2, Vf, Fa),
 	arrisca(X, Y).
