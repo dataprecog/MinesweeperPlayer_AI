@@ -39,17 +39,21 @@ inicializar_base_dados :-
     assertz('$marcadas'(0)).
 
 abrir( X, Y ) :-
-	retract( '$abertas'(N) ),
+	retract('$abertas'(N)),
 	N1 is N + 1,
-	assert( '$abertas'(N1) ),
-	( not aberta(X,Y) -> assert( aberta(X,Y) ) ; true ), !,
-	( not '$mina' (X,Y) -> true ; 	retract ( '$errados' (E) ),
+	assert('$abertas'(N1)),
+	(\+ aberta(X,Y) -> 
+		assert(aberta(X,Y)) 
+	; 
+		true 
+	), !,
+	(\+ '$mina'(X,Y) -> true ; 	retract('$errados'(E)),
 									E1 is E + 1,
-									assert( '$errados' (E1) ),
+									assert('$errados'(E1)),
 !, fail
 	).
 
-mina( X, Y ) :-
+mina(X, Y) :-
 	aberta(X,Y),
 	'$mina'(X,Y).
 
@@ -64,10 +68,10 @@ minas(X, Y, N) :-
 %
 %================================================================================
 marcar(X, Y) :-
-	(not marca(X,Y) -> 	assert( marca(X,Y) ),
-						retract ( '$marcadas'(N) ),
+	(\+ marca(X,Y) -> 	assert(marca(X,Y)),
+						retract('$marcadas'(N)),
 						N1 is N + 1,
-						assert( '$marcadas'(N1) )
+						assert('$marcadas'(N1))
 	;
 						true
 	).
@@ -76,13 +80,13 @@ marcar(X, Y) :-
 %
 %================================================================================
 '$contar'(X,Y,N) :-
-	findall( 1, (
-		member(Dx, [-1,0,1]), member( Dy, [-1,0,1]), Vx is X + Dx, Vy is Y + Dy,
-			not (X = Vx, Y = Vy), '$mina' (Vx,Vy)
+	findall(1, (
+		member(Dx, [-1,0,1]), member(Dy, [-1,0,1]), Vx is X + Dx, Vy is Y + Dy,
+			\+ (X = Vx, Y = Vy), '$mina'(Vx,Vy)
 		),
 		M
 	),
-	length (M,N).
+	length(M,N).
 
 %================================================================================
 %
@@ -116,8 +120,8 @@ viz_fechada_rec([(X, Y)|Xs], N, L) :-
 	viz_fechada_rec(Xs, N, L).
 
 viz_fechada_rec([(X, Y)|Xs], N, [(X,Y)|L1]) :-
-	not aberta(X, Y),
-	not marca(X, Y), !,
+	\+ aberta(X, Y),
+	\+ marca(X, Y), !,
 	viz_fechada_rec(Xs, N1, L1),
 	N is N1 +1, !.
 
@@ -137,7 +141,7 @@ viz_fechada((X, Y), N, L) :-
 viz_aberta_rec([], 0, []).
 
 viz_aberta_rec([(X, Y)|Xs], N, L) :-
-	not aberta(X, Y),
+	\+ aberta(X, Y),
 	viz_aberta_rec(Xs, N, L), !.
 
 viz_aberta_rec([(X, Y)|Xs], N, [(X, Y)|L1]) :-
@@ -158,8 +162,8 @@ viz_aberta((X, Y), N, L) :-
 minas_viz_rec([], 0) :- !.
 
 minas_viz_rec([(X, Y)|Xs], N) :-
-	not mina(X, Y),
-	not marca(X, Y), !,
+	\+ mina(X, Y),
+	\+ marca(X, Y), !,
 	minas_viz_rec(Xs, N).
 
 minas_viz_rec([(X, Y)|Xs], N) :-
@@ -177,7 +181,7 @@ minas_viz((X,Y), N) :-
 %================================================================================
 % casa nao esta junto as margens.
 vizinhanca((X, Y), V) :-
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	X > 1,
 	X < Xd,
 	Y > 1,
@@ -186,11 +190,11 @@ vizinhanca((X, Y), V) :-
 	X2 is X + 1,
 	Y1 is Y - 1,
 	Y2 is Y + 1,
-	toLst ([(X1,Y)|[(X1,Y2)|[(X,Y2)|[(X2,Y2)|[(X2,Y)|[(X2,Y1)|[(X,Y1)|[(X1,Y1)]]]]]]]], V).
+	toLst([(X1,Y)|[(X1,Y2)|[(X,Y2)|[(X2,Y2)|[(X2,Y)|[(X2,Y1)|[(X,Y1)|[(X1,Y1)]]]]]]]], V).
 	
 % casa esta em cima.
 vizinhanca((X, Y), V) :-
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	X > 1,
 	X < Xd,
 	Y = 1,
@@ -203,7 +207,7 @@ vizinhanca((X, Y), V) :-
 % casa esta em baixo.
 vizinhanca((X, Y), V) :-
 
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	X > 1,
 	X < Xd,
 	Y = Yd,
@@ -216,20 +220,20 @@ vizinhanca((X, Y), V) :-
 % casa esta junto a esquerda.
 %================================================================================
 vizinhanca((X, Y), V) :-
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	X = 1,
 	Y > 1,
 	Y < Yd,
 	X2 is X + 1,
 	Y1 is Y - 1,
 	Y2 is Y + 1,
-	toLst ([(X,Y2)|[(X2,Y2)|[(X2,Y)|[(X2,Y1)|[(X,Y1)]]]]], V).
+	toLst([(X,Y2)|[(X2,Y2)|[(X2,Y)|[(X2,Y1)|[(X,Y1)]]]]], V).
 
 %================================================================================
 % casa esta a direita.
 %================================================================================
 vizinhanca((X, Y), V) :-
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	X = Xd,
 	Y > 1,
 	Y < Yd,
@@ -263,7 +267,7 @@ vizinhanca((X, Y), V) :-
 % casa do canto sup. dir.
 %================================================================================
 vizinhanca((X, Y), V) :-
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	X = Xd,
 	Y = 1,
 	X1 is X - 1,
@@ -274,7 +278,7 @@ vizinhanca((X, Y), V) :-
 % casa do canto inf. dir.
 %================================================================================
 vizinhanca((X, Y), V) :-
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	X = Xd,
 	Y = Yd,
 	X1 is X - 1,
@@ -307,8 +311,8 @@ actualiza_front([], F, F) :- !.
 
 actualiza_front(F, [], F) :- !.
 
-actualiza_front([C|Xs], [C2|Xs2], [C2|F2]) :
-	not member(C2, [C|Xs]), !,
+actualiza_front([C|Xs], [C2|Xs2], [C2|F2]) :-
+	\+ member(C2, [C|Xs]), !,
 	actualiza_front([C|Xs], Xs2, F2).
 
 actualiza_front([C|Xs], [C2|Xs2], F) :-
@@ -443,7 +447,7 @@ joga_incerteza(F, [(X,Y,P)|Ps], Fa) :-
 
 joga_incerteza(F, [(X,Y,P)|Ps], Fa) :-
 	P > 0.25, !,
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	aleatorio(Xd, Yd, F, Fa).
 
 arrisca(X, Y) :-
@@ -455,7 +459,7 @@ arrisca(X, Y) :- !.
 % incerteza(+Fp).
 % Fp 	-> lista de elementos(X, Y, Prob), em que Prob e a probabilidade de
 % 				existencia de mina na casa de coordenadas (X, Y).
-================================================================================
+%================================================================================
 incerteza([]).
 
 incerteza([(X, Y, Prob)|Xs]) :-
@@ -472,7 +476,7 @@ incerteza([(X, Y, Prob)|Xs]) :-
 % 	casas.
 %================================================================================
 abre(F, Fp, Fa) :-
-	not incerteza(Fp), !,
+	\+ incerteza(Fp), !,
 	abrir_rec(F, Fp, Fa).
 
 abre(F, Fp, Fa) :-
@@ -485,7 +489,7 @@ abre(F, Fp, Fa) :-
 jogar(F) :-
 	pontuacao(A, M, D),
 	Cont is A + M,
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	Dim is Xd * Yd,
 	Cont < Dim,
 	analisa(F, Fa), !,
@@ -494,7 +498,7 @@ jogar(F) :-
 jogar(F) :-
 	pontuacao(A, M, D),
 	Cont is A + M,
-	dimensao (Xd, Yd),
+	dimensao(Xd, Yd),
 	Dim is Xd * Yd,
 	Cont < Dim, !,
 	aleatorio(Xd, Yd, F, F2),
@@ -514,8 +518,8 @@ jogar(F) :-
 aleatorio(Xd, Yd, F, Fr) :-
 	X is int(rand(Xd) + 1),
 	Y is int(rand(Yd) + 1),
-	not aberta(X, Y),
-	not marca(X, Y), !,
+	\+ aberta(X, Y),
+	\+ marca(X, Y), !,
 	viz_fechada((X, Y), N, V),
 	remove_front(F, (X, Y), F2),
 	actualiza_front(F2, V, Fr),
